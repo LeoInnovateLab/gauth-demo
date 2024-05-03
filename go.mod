@@ -3,7 +3,7 @@ module github.com/LeoInnovateLab/gauth-demo
 go 1.22.1
 
 require (
-	github.com/LeoInnovateLab/gauth v0.0.1
+	github.com/LeoInnovateLab/gauth v0.0.2
 	github.com/gorilla/schema v1.3.0
 	github.com/joho/godotenv v1.5.1
 )

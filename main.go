@@ -49,6 +49,10 @@ func pickAuthRequest(source string) gauth.AuthRequest {
 		clientId = os.Getenv("GOOGLE_CLIENT_ID")
 		secret = os.Getenv("GOOGLE_SECRET")
 		break
+	case "facebook":
+		clientId = os.Getenv("FACEBOOK_APP_ID")
+		secret = os.Getenv("FACEBOOK_APP_SECRET")
+		break
 	}
 
 	authRequest, err := gauth.New().
@@ -95,12 +99,11 @@ func callback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response, authError := authRequest.Login(c)
+	response, err := authRequest.Login(c)
 	var jsonByte []byte
-	if authError != nil {
-		log.Printf("Failed to login:%v", authError)
-		jsonByte, _ = json.Marshal(authError)
-		http.Error(w, string(jsonByte), http.StatusBadRequest)
+	if err != nil {
+		log.Printf("Failed to login:%v", err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	} else {
 		jsonByte, _ = json.Marshal(response)
