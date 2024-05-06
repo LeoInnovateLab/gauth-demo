@@ -1,15 +1,12 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/LeoInnovateLab/gauth"
 	_ "github.com/LeoInnovateLab/gauth/register"
-	"github.com/LeoInnovateLab/gauth/utils"
-	"github.com/gorilla/schema"
+	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"log"
-	"net/http"
 	"os"
 )
 
@@ -21,16 +18,15 @@ func main() {
 		log.Fatalf("Error loading .env file %v", err)
 	}
 
-	port := 8080
+	r := gin.Default()
+	r.LoadHTMLGlob("templates/*")
+	r.Static("/assets", "./assets")
 
-	http.HandleFunc("GET /auth/{source}/login", login)
-	http.HandleFunc("GET /auth/{source}/callback", callback)
+	r.GET("/", homeHandler)
+	r.GET("/auth/:source/login", loginHandler)
+	r.GET("/auth/:source/callback", callbackHandler)
 
-	err = http.ListenAndServe(fmt.Sprintf(":%d", port), nil)
-	if err != nil {
-		log.Printf("Failed to start server:%v", err)
-		return
-	}
+	r.Run(":8080")
 }
 
 func pickAuthRequest(source string) gauth.AuthRequest {
@@ -69,45 +65,4 @@ func pickAuthRequest(source string) gauth.AuthRequest {
 	authRequestMap[source] = authRequest
 
 	return authRequest
-}
-
-func login(w http.ResponseWriter, r *http.Request) {
-	source := r.PathValue("source")
-	authRequest := pickAuthRequest(source)
-	authorizeUrl, err := authRequest.Authorize(utils.CreateState())
-	if err != nil {
-		log.Printf("Failed to authorize:%v", err)
-		http.Error(w, "Failed to authorize", http.StatusInternalServerError)
-		return
-	}
-
-	http.Redirect(w, r, authorizeUrl, http.StatusMovedPermanently)
-}
-
-func callback(w http.ResponseWriter, r *http.Request) {
-	source := r.PathValue("source")
-	authRequest := pickAuthRequest(source)
-
-	var c gauth.AuthCallback
-
-	decoder := schema.NewDecoder()
-	decoder.IgnoreUnknownKeys(true)
-	err := decoder.Decode(&c, r.URL.Query())
-	if err != nil {
-		log.Printf("Failed to decode request body:%v", err)
-		http.Error(w, "Failed to decode request body", http.StatusBadRequest)
-		return
-	}
-
-	response, err := authRequest.Login(c)
-	var jsonByte []byte
-	if err != nil {
-		log.Printf("Failed to login:%v", err)
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	} else {
-		jsonByte, _ = json.Marshal(response)
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(jsonByte)
 }
