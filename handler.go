@@ -54,7 +54,5 @@ func callbackHandler(c *gin.Context) {
 		})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"data": response,
-	})
+	c.JSON(http.StatusOK, response)
 }

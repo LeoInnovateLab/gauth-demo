@@ -27,6 +27,7 @@ func main() {
 	r.GET("/auth/:source/callback", callbackHandler)
 
 	r.Run(":8080")
+	//r.RunTLS(":8080", "cert.pem", "key.pem")
 }
 
 func pickAuthRequest(source string) gauth.AuthRequest {
@@ -48,6 +49,10 @@ func pickAuthRequest(source string) gauth.AuthRequest {
 	case "facebook":
 		clientId = os.Getenv("FACEBOOK_APP_ID")
 		secret = os.Getenv("FACEBOOK_APP_SECRET")
+		break
+	case "slack":
+		clientId = os.Getenv("SLACK_CLIENT_ID")
+		secret = os.Getenv("SLACK_SECRET")
 		break
 	}
 
