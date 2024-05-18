@@ -54,6 +54,10 @@ func pickAuthRequest(source string) gauth.AuthRequest {
 		clientId = os.Getenv("SLACK_CLIENT_ID")
 		secret = os.Getenv("SLACK_SECRET")
 		break
+	case "linkedin":
+		clientId = os.Getenv("LINKEDIN_CLIENT_ID")
+		secret = os.Getenv("LINKEDIN_SECRET")
+		break
 	}
 
 	authRequest, err := gauth.New().
